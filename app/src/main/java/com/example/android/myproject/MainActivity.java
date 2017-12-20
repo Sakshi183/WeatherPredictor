@@ -21,26 +21,30 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String s = name.getText().toString();
-                if(s==null||s=="")
-                {
-                    Toast.makeText(MainActivity.this,"Hello please enter your name ",Toast.LENGTH_SHORT);
+
+                    String s = name.getText().toString();
+                    s = s.trim();
+                    //Log.v("Name",s);
+                    if (s.length()==0) {
+                        Toast.makeText(MainActivity.this, "Please enter your name ", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                        {
+                            //Log.v("Name passed:",s);
+
+                        Intent i = new Intent(MainActivity.this, MapsActivity.class);
+
+                        Bundle bundle = new Bundle();
+
+                        bundle.putString("NAME", name.getText().toString());
+                        //Log.v("Name display")
+                        //Add the bundle to the intent
+                        i.putExtras(bundle);
+                        startActivity(i);
+                    }
                 }
-                else {
 
 
-                    Intent i = new Intent(MainActivity.this, MapsActivity.class);
-
-                    Bundle bundle = new Bundle();
-
-                    bundle.putString("NAME", name.getText().toString());
-                    //Log.v("Name display")
-                    //Add the bundle to the intent
-                    i.putExtras(bundle);
-                    startActivity(i);
-                }
-
-            }
         });
 
 

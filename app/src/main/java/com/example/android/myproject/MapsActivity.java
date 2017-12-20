@@ -38,7 +38,9 @@ import java.util.List;
 //com.google.android.gms.maps.GoogleMap
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-    public  static  String LOG_TAG ="MainActivity";
+    public  static  String LOG_TAG ="MapsActivity";
+
+    // base urls for location and weather
     public static String REQUEST_URL_LOCATTION = "http://dataservice.accuweather.com/locations/v1/cities/geoposition/search";
     public static String REQUEST_URL_WEATHER = "http://dataservice.accuweather.com/currentconditions/v1/";
 
@@ -68,6 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         textView = (TextView) findViewById(R.id.display_name);
         //name = "Sakshi";
         textView.setText("Hello "+name);
+        // by defualt map will show a marker on Gandhinagar,Gujarat.
         lat  = 23.215635;
          longi = 72.63694149;
 
@@ -75,14 +78,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         weatherData = (TextView) findViewById(R.id.test);
 
         Button sendButton = (Button) findViewById(R.id.sendButton);
-        //weatherData.setText(name);
+
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String s = location.getText().toString();
-                if(s==null||s=="")
+                if(s.length()==0)
                 {
-                    Toast.makeText(MapsActivity.this,"Hello please enter location ",Toast.LENGTH_SHORT);
+                    Toast.makeText(MapsActivity.this,"Please enter location ",Toast.LENGTH_SHORT).show();
                 }
                 else {
 
@@ -106,12 +109,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+/// creates url for location
     public URL doJob() {
         String s = makeURLLocation();
         URL url = createUrl(s);
         return url;
 
     }
+
+
+    //constructs URL for location,adds parameters
     public String makeURLLocation(){
 
         Uri baseUri = Uri.parse(REQUEST_URL_LOCATTION);
@@ -125,7 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         uriBuilder.appendQueryParameter("language", "en-us");
         uriBuilder.appendQueryParameter("details", "false");
         uriBuilder.appendQueryParameter("toplevel", "false");
-        Log.v(LOG_TAG,uriBuilder.toString());
+        //Log.v(LOG_TAG,uriBuilder.toString());
 
 
         // Log.e("EARTHQUAKEACTIVITY",uriBuilder.toString());
@@ -133,6 +141,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return uriBuilder.toString();
 
     }
+
+
+    //constructs URL for Weather ,adds parameters
     public String makeURLWeather(String location){
         String r = REQUEST_URL_WEATHER + location;
 
@@ -149,11 +160,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Log.e("EARTHQUAKEACTIVITY",uriBuilder.toString());
         // return new EarthquakeLoader(this, uriBuilder.toString());
-        Log.v(LOG_TAG,uriBuilder.toString());
+        //Log.v(LOG_TAG,uriBuilder.toString());
         return uriBuilder.toString();
     }
-
-
 
 
     // creates a ur l
@@ -169,11 +178,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return url;
 
     }
+
+
+    // sends a request to server ,gets json
     private static String makeHttpRequest(URL url) throws IOException {
 
         String jsonResponse = "";
 
-        // If the URL is null, then return early.
+
         if (url == null) {
             return jsonResponse;
         }
@@ -211,6 +223,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return jsonResponse;
     }
 
+
+    // helper method to read response
     private static String readFromStream(InputStream inputStream) throws IOException {
 
         // to store the json Response
@@ -232,6 +246,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+    // parses json to find location
     public static String getlocation(String jsonResponse) {
 
         // if the json Response is empty or null, then return
@@ -257,6 +273,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    // parses json to get weather
     public static String getWeather(String jsonResponse){
         if (TextUtils.isEmpty(jsonResponse)){
             return null;
@@ -299,6 +316,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    // change the marker on map to the entered location
     public void changemarker(GoogleMap googleMap){
 
         mMap = googleMap;
@@ -311,24 +329,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+
+    // it will get the latitude and longitude
     public  void geocoderTry(String loc) {
         Geocoder geocoder  = new Geocoder(this);
-        Log.v("location is:",loc);
+        //Log.v("location is:",loc);
 
         try {
             List<Address> geoResults = geocoder.getFromLocationName(loc, 1);
             while (geoResults.size()==0) {
                 //geoResults = geocoder.getFromLocationName("gandhinagar ", 1);
-                Toast.makeText(this,"in geocoder",Toast.LENGTH_LONG);
+
             }
             if (geoResults.size()>0) {
-                Toast.makeText(this,"deeeppppp",Toast.LENGTH_LONG);
+
                 Address addr = geoResults.get(0);
                  lat   = addr.getLatitude();
                 longi = addr.getLongitude();
                 String s = Double.toString(lat);
                 String t = Double.toString(longi);
-                Log.v("hi","Latitude is:"+ s);
+                //Log.v("hi","Latitude is:"+ s);
                 changemarker(mMap);
 
 
@@ -341,10 +361,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         catch (Exception e) {
-            Log.v("hi", (e.getMessage()));
+            Log.e(LOG_TAG, (e.getMessage()));
         }
     }
 
+
+    // gets weather and location of the place
     private class getWeatherTask extends AsyncTask<URL, Integer, String> {
         protected String doInBackground(URL... urls) {
 
@@ -355,20 +377,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String jsonResponse = null;
             try {
                 jsonResponse = makeHttpRequest(urls[0]);
-                Log.v(LOG_TAG,"JSON_RESPONSE:"+jsonResponse);
+
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Problem Closing inputStream", e);
             }
             String location = getlocation(jsonResponse);
-
-
-            Log.v(LOG_TAG,"LOCATION KEY IS:"+location);
-
-
-
-////////////////////////////////
-
             String t = makeURLWeather(location);
             URL url2 = createUrl(t);
             String jsonResponse2 = null;
@@ -381,20 +395,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             String weather = getWeather(jsonResponse2);
-            Log.v(LOG_TAG,"WEATHER:"+weather);
             return  weather;
-
-
-
         }
 
         protected void onProgressUpdate(Integer... progress) {
-            //etProgressPercent(progress[0]);
         }
 
         protected void onPostExecute(String result) {
             weatherData.setText(result);
-            //showDialog("Downloaded " + result + " bytes");
         }
     }
 
